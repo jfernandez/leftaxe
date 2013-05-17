@@ -1,3 +1,5 @@
+# http://roguebasin.roguelikedevelopment.org/index.php?title=Dungeon-Building_Algorithm
+
 class Dungeon
   BLANK_TILE = 0
   FLOOR_TILE = 1
