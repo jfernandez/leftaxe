@@ -122,5 +122,5 @@ class Room
   end
 end
 
-#d = Dungeon.new(30, 30, nil, nil)
-#d.draw
+# d = Dungeon.new(20, 20, nil, nil)
+# d.draw
