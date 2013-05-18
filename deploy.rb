@@ -7,3 +7,4 @@
 `git add .`
 `git commit -m 'Github pages release'`
 `git push origin gh-pages --force`
+`git checkout master`
