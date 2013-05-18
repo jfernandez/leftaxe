@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head profile="http://www.w3.org/2005/10/profile">
+  <title>Left Axe - Dungeon Generator</title>
+  <style type="text/css">
+    html,body {
+      background-color: #333;
+      color: #fff;
+      font-family: helvetica, arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      font-size: 12px;
+    }
+
+    #grid {
+      position: center;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+    }
+
+    td {
+      width:15px;
+      height:15px;
+      text-align: center;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+  <script type="text/javascript" src="lib/generators/dungeon.js"></script>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+
+  <script type="text/javascript">
+    $(function() {
+      var dungeon = new Dungeon(30, 30, 10, 80);
+      $.each(dungeon.tiles, function(index, row) {
+        row_html = "<tr>";
+        $.each(row, function(index, tile) {
+          row_html += '<td>' + String(tile) + '</td>';
+        });
+        row_html += "</td>";
+        $('#grid tr:last').after(row_html);
+      });
+    });
+
+  </script>
+</head>
+<body>
+  <table id="grid">
+    <tr>
+    </tr>
+  </table>
+</body>
+</html>
