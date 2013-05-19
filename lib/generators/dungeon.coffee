@@ -18,7 +18,8 @@ class Dungeon
     # Dig out a single room in the center of the map
     x = Math.floor(@map_width / 2)
     y = Math.floor(@map_height / 2)
-    @make_room(x, y, 5, 5)
+    dir = @random(0, 3)
+    @make_room(x, y, 8, 8, dir)
     @current_features += 1
 
     # Star the main loop
@@ -77,15 +78,21 @@ class Dungeon
 
       if valid_tile > -1
         # Chose what to build at our newly found place, and what direction
-        feature = Math.floor((Math.random() * 100) + 0)
+        feature = @random(0, 100)
         if feature <= @room_chance
-          if @make_room((newx + xmod), (newy + ymod), 8, 6, valid_tile)
+          if @make_room((newx + xmod), (newy + ymod), 8, 8, valid_tile)
             @current_features += 1
 
             # Mark the wall opening with a door
             @set_tile(newx, newy, DOOR_TILE)
 
             # Clean up in front of the door so we can reach it
+            @set_tile((newx + xmod), (newy + ymod), FLOOR_TILE)
+        else if feature >= @room_chance
+          if @make_corridor((newx + xmod), (newy + ymod), 6, valid_tile)
+            @current_features += 1
+
+            @set_tile(newx, newy, DOOR_TILE)
             @set_tile((newx + xmod), (newy + ymod), FLOOR_TILE)
 
       counting_tries += 1
@@ -97,10 +104,13 @@ class Dungeon
         row.push(BLANK_TILE)
       @tiles.push(row)
 
-  make_room: (x, y, width, height) ->
-    room = new Room(x, y, width, height, Math.floor((Math.random() * 3) + 1), this)
-    #room = new Room(x, y, width, height, 3, this)
+  make_room: (x, y, width, height, direction) ->
+    room = new Room(x, y, width, height, direction, this)
     room.build()
+
+  make_corridor: (x, y, length, direction) ->
+    corridor = new Corridor(x, y, length, direction, this)
+    corridor.build()
 
   get_tile: (x, y) ->
     @tiles[y][x]
@@ -119,8 +129,8 @@ class Dungeon
 
 class Room
   constructor: (@x, @y, @width, @height, @direction, @dungeon) ->
-    @xlen = Math.floor((Math.random() * @width) + 4);
-    @ylen = Math.floor((Math.random() * @height) + 4);
+    @xlen = @dungeon.random(4, @width)
+    @ylen = @dungeon.random(4, @height)
     @dir = 0
     @dir = @direction if @direction > 0 && @direction < 4
 
@@ -203,7 +213,6 @@ class Room
         xtemp +=1
       ytemp +=1
 
-
   has_enough_space_south: ->
     ytemp = @y
     while ytemp < @y + @ylen
@@ -257,7 +266,7 @@ class Room
       while xtemp > @x - @xlen
         if xtemp == @x
           @dungeon.set_wall_tile(xtemp, ytemp)
-        else if xtemp == @x - @xlen - 1
+        else if xtemp == @x - @xlen + 1
           @dungeon.set_wall_tile(xtemp, ytemp)
         else if ytemp == @y - Math.floor(@ylen / 2)
           @dungeon.set_wall_tile(xtemp, ytemp)
@@ -267,3 +276,16 @@ class Room
           @dungeon.set_floor_tile(xtemp, ytemp)
         xtemp -= 1
       ytemp += 1
+
+class Corridor extends Room
+  constructor: (@x, @y, @length, @direction, @dungeon) ->
+    horizontal = @dungeon.random(0, 1)
+    if horizontal
+      @xlen = @dungeon.random(3, @length)
+      @ylen = 3
+    else
+      @xlen = 3
+      @ylen = @dungeon.random(3, @length)
+
+    @dir = 0
+    @dir = @direction if @direction > 0 && @direction < 4

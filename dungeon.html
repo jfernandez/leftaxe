@@ -9,24 +9,12 @@
       font-family: helvetica, arial, sans-serif;
       margin: 0;
       padding: 0;
-      font-size: 12px;
+      line-height: 0;
     }
 
     #grid {
-      position: center;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      margin: auto;
-    }
-
-    td {
-      width:15px;
-      height:15px;
-      text-align: center;
-      padding: 0;
-      margin: 0;
+      height: 480px;
+      width: 640px;
     }
   </style>
 
@@ -36,24 +24,43 @@
 
   <script type="text/javascript">
     $(function() {
-      var dungeon = new Dungeon(30, 30, 20, 100);
+      jQuery.fn.center = function () {
+        this.css("position","absolute");
+        this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) +
+                                                      $(window).scrollTop()) + "px");
+        this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) +
+                                                      $(window).scrollLeft()) + "px");
+        return this;
+      }
+
+      var dungeon = new Dungeon(80, 60, 60, 80);
       $.each(dungeon.tiles, function(index, row) {
-        row_html = "<tr>";
+        row_html = "";
         $.each(row, function(index, tile) {
-          row_html += '<td>' + String(tile) + '</td>';
+          if(tile === 0) {
+            row_html += '<img src="media/blank.png" />';
+          } else if(tile === 1) {
+            row_html += '<img src="media/floor.png" />';
+          } else if(tile === 2) {
+            row_html += '<img src="media/blank.png" />';
+          } else if(tile === 5) {
+            row_html += '<img src="media/door.png" />';
+          } else {
+            row_html += String(tile);
+          }
         });
-        row_html += "</td>";
-        $('#grid tr:last').after(row_html);
+        row_html += "<br/>";
+        $('#grid').append(row_html);
       });
+
+      $('#grid').center();
     });
 
   </script>
 </head>
 <body>
-  <br/>
-  <table id="grid">
-    <tr>
-    </tr>
-  </table>
+  <div id="grid">
+    <h3>Reload page to generate a new dungeon</h3>
+  </div>
 </body>
 </html>
