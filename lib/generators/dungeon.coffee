@@ -3,17 +3,40 @@
 class Dungeon
   BLANK_TILE = 0
   FLOOR_TILE = 1
-  WALL_TILE  = 2
-  CORRIDOR_TILE = 3
-  DOOR_TILE = 5
+  WALL_TILE = 2
+  DOOR_TILE = 3
+  CORRIDOR_TILE = 4
 
   random: (min, max) ->
     Math.floor(Math.random() * (max - min + 1)) + min;
+
+  distance: (x1, y1, x2, y2) ->
+    Math.sqrt(Math.pow((y2 - y1), 2) + Math.pow((x2 - x1), 2))
+
+  collision_map: ->
+    _.map @tiles, (row) ->
+      _.map row, (tile) ->
+        if tile == WALL_TILE
+          FLOOR_TILE
+        else
+          BLANK_TILE
+
+  background_map: ->
+    _.map @tiles, (row) ->
+      _.map row, (tile) ->
+        if tile == WALL_TILE
+          BLANK_TILE
+        else if tile == DOOR_TILE
+          FLOOR_TILE
+        else
+          tile
 
   constructor: (@map_width, @map_height, @max_features, @room_chance) ->
     @tiles = []
     @current_features = 0
     @fill_map()
+    @up_stairs_pos = { x: 0, y: 0}
+    @down_stairs_pos = { x: 0, y: 0}
 
     # Dig out a single room in the center of the map
     x = Math.floor(@map_width / 2)
@@ -96,6 +119,51 @@ class Dungeon
             @set_tile((newx + xmod), (newy + ymod), FLOOR_TILE)
 
       counting_tries += 1
+
+    # Sprinkle bonus stuff (stairs, chests, etc)
+    newx = 0
+    newy = 0
+    ways = 0
+    state = 0
+    while state != 10
+      testing = 0
+      while testing < 1000
+        newx = @random(1, @map_width - 1)
+        newy = @random(1, @map_height - 2)
+
+        # From how many directions can we reach the random spot
+        # less is better
+        ways = 4
+
+        north_tile = @get_tile(newx, newy + 1)
+        east_tile = @get_tile(newx - 1, newy)
+        south_tile = @get_tile(newx, newy - 1)
+        west_tile = @get_tile(newx + 1, newy)
+
+        if north_tile == FLOOR_TILE
+          ways -= 1
+        if east_tile == FLOOR_TILE
+          ways -= 1
+        if south_tile == FLOOR_TILE
+          ways -= 1
+        if west_tile == FLOOR_TILE
+          ways -= 1
+
+        if state == 0 && ways == 0
+          # We're in state 0, lets set the up stairs location
+          @up_stairs_pos.x = newx
+          @up_stairs_pos.y = newy
+          state = 1
+          break
+        else if state == 1 && ways == 0 && @distance(@up_stairs_pos.x, @up_stairs_pos.y, newx, newy) > 10
+          # Make sure the downstairs aren't too close
+          @down_stairs_pos.x = newx
+          @down_stairs_pos.y = newy
+          state = 10
+          break
+        testing += 1
+
+
 
   fill_map: ->
     for y in [1..@map_height]
