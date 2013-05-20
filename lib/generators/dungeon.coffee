@@ -13,6 +13,13 @@ class Dungeon
   distance: (x1, y1, x2, y2) ->
     Math.sqrt(Math.pow((y2 - y1), 2) + Math.pow((x2 - x1), 2))
 
+  # Returns true if there is an entity collision
+  collides: (x, y, distance) ->
+    caller = this
+    _.some @entities, (entity) ->
+      caller.distance(x, y, entity.x, entity.y) < distance
+
+
   collision_map: ->
     _.map @tiles, (row) ->
       _.map row, (tile) ->
@@ -37,6 +44,8 @@ class Dungeon
     @fill_map()
     @up_stairs_pos = { x: 0, y: 0}
     @down_stairs_pos = { x: 0, y: 0}
+    @monsters = []
+    @entities = []
 
     # Dig out a single room in the center of the map
     x = Math.floor(@map_width / 2)
@@ -149,20 +158,27 @@ class Dungeon
         if west_tile == FLOOR_TILE
           ways -= 1
 
-        if state == 0 && ways == 0
+        pos = { x: newx, y: newy }
+
+        if state == 0 && ways == 0 && !@collides(newx, newy, 2)
           # We're in state 0, lets set the up stairs location
           @up_stairs_pos.x = newx
           @up_stairs_pos.y = newy
+          @entities.push pos
           state = 1
           break
-        else if state == 1 && ways == 0 && @distance(@up_stairs_pos.x, @up_stairs_pos.y, newx, newy) > 10
+        else if state == 1 && ways == 0 && @distance(@up_stairs_pos.x, @up_stairs_pos.y, newx, newy) > 10 && !@collides(newx, newy, 2)
           # Make sure the downstairs aren't too close
           @down_stairs_pos.x = newx
           @down_stairs_pos.y = newy
-          state = 10
+          @entities.push pos
+          state = 2
           break
+        else if state == 2 && ways == 0 && !@collides(newx, newy, 3)
+          @monsters.push pos
+          @entities.push pos
+          state = 10 if @monsters.length > 10
         testing += 1
-
 
 
   fill_map: ->
