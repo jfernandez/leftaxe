@@ -28,6 +28,17 @@ class Dungeon
         else
           BLANK_TILE
 
+  collisionMap: ->
+    map = {}
+    _.each @tiles, (row, yIndex) ->
+      _.each row, (tile, xIndex) ->
+        key = x + ',' + y
+        if tile == WALL_TILE
+          map[key] = FLOOR_TILE
+        else
+          map[key] = BLANK_TILE
+    map
+
   background_map: ->
     _.map @tiles, (row) ->
       _.map row, (tile) ->
@@ -167,7 +178,7 @@ class Dungeon
           @entities.push pos
           state = 1
           break
-        else if state == 1 && ways == 0 && @distance(@up_stairs_pos.x, @up_stairs_pos.y, newx, newy) > 10 && !@collides(newx, newy, 2)
+        else if state == 1 && ways == 0 && @distance(@up_stairs_pos.x, @up_stairs_pos.y, newx, newy) > 2 && !@collides(newx, newy, 2)
           # Make sure the downstairs aren't too close
           @down_stairs_pos.x = newx
           @down_stairs_pos.y = newy
