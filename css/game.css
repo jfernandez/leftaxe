@@ -4,13 +4,16 @@ html, body {
   font-family: helvetica, arial, sans-serif;
 }
 
-.center {
-  float: none;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-
 h1 {
   font-family: 'Metal Mania', cursive;
+}
+
+.hud {
+  height: 100px;
+  width: 720px;
+  background-color: #000;
+  background-image: url(../media/hud.png);
+  background-repeat: no-repeat;
+  margin-left: 110px;
+  background-position: 5px 5px;
 }
